@@ -1,12 +1,15 @@
 {
-  "name": "housebuilding-app",
-  "version": "1.0.0",
-  "description": "Aplikacija za praćenje faza i troškova izgradnje kuće",
-  "main": "src/app.js",
+  "name": "housebuilding-standalone",
+  "productName": "HouseBuilding Standalone",
+  "version": "2.4.0",
+  "description": "Aplikacija za pracenje faza i troskova izgradnje kuce",
+  "main": "electron_main.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/app.js",
     "start": "node src/app.js",
+    "desktop": "electron .",
+    "build:exe": "npx @electron/packager . HouseBuilding_Standalone --platform=win32 --arch=x64 --out=dist --overwrite --ignore=\"^/(dist|temp|.*\\.zip)\"",
     "db:migrate": "npx prisma migrate dev",
     "db:generate": "npx prisma generate"
   },
@@ -26,15 +29,12 @@
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
+    "@electron/packager": "^18.3.0",
+    "electron": "^33.2.0",
     "nodemon": "^3.1.7",
     "prisma": "^5.20.0"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
-  },
-  "nodemonConfig": {
-    "watch": ["src"],
-    "ext": "js,mjs,cjs",
-    "ignore": ["company-logo.png", "settings_local.json", "public/uploads/*"]
   }
 }
