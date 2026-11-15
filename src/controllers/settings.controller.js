@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import prisma from '../config/db.js';
 
@@ -7,21 +8,46 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const LOGO_PATH = path.join(__dirname, '../../company-logo.png');
 
+// Tajni ključ za verifikaciju licenci (promeni ili drži u .env)
+const LICENSE_SALT = process.env.LICENSE_SALT || 'HB-2026-SECRET-SALT';
+
+export function verifyLicenseKey(keyStr) {
+    if (!keyStr || typeof keyStr !== 'string') return 'core';
+    const clean = keyStr.trim().toUpperCase();
+    // Format ključa: HB-PRO-XXXX-YYYY ili HB-ULTIMATE-XXXX-YYYY
+    const parts = clean.split('-');
+    if (parts.length !== 4 || parts[0] !== 'HB') return 'core';
+    const tier = parts[1].toLowerCase();
+    if (!['core', 'pro', 'ultimate'].includes(tier)) return 'core';
+
+    const payload = `${parts[0]}-${parts[1]}-${parts[2]}`;
+    const expectedSig = crypto
+        .createHmac('sha256', LICENSE_SALT)
+        .update(payload)
+        .digest('hex')
+        .substring(0, 4)
+        .toUpperCase();
+
+    // Dozvoli i tvoj master developerski ključ za testiranje:
+    if (clean === 'HB-ULTIMATE-2026-MASTER') return 'ultimate';
+    if (clean === 'HB-PRO-2026-MASTER') return 'pro';
+
+    return parts[3] === expectedSig ? tier : 'core';
+}
+
 const DEFAULT_SETTINGS = {
-    company_name: 'Gradnja Pro',
+    company_name: 'HouseBuilding',
     company_pib: '',
-    company_mb: '',
     company_address: '',
     company_bank_acc: '',
     currency_base: 'EUR',
     default_lang: 'sr',
-    license_tier: 'ultimate', // 'core' | 'pro' | 'ultimate'
     license_key: '',
+    license_tier: 'core',
     smtp_host: 'smtp.gmail.com',
     smtp_port: '587',
     smtp_user: '',
-    smtp_pass: '',
-    admin_email: ''
+    smtp_pass: ''
 };
 
 export const getSettings = async (req, res) => {
@@ -32,6 +58,9 @@ export const getSettings = async (req, res) => {
         for (const r of rows) {
             settingsMap[r.key] = r.value;
         }
+        // Uvek izračunaj paket isključivo iz ključa
+        settingsMap.license_tier = verifyLicenseKey(settingsMap.license_key);
+
         res.json({
             settings: settingsMap,
             hasCustomLogo: fs.existsSync(LOGO_PATH)
@@ -46,18 +75,20 @@ export const saveSettings = async (req, res) => {
     try {
         const dbClient = req.prisma || prisma;
         const body = req.body || {};
+        const verifiedTier = verifyLicenseKey(body.license_key || '');
 
-        if (req.body?.remove_logo === 'true' && fs.existsSync(LOGO_PATH)) {
+        if (body.remove_logo === 'true' && fs.existsSync(LOGO_PATH)) {
             fs.unlinkSync(LOGO_PATH);
         }
 
-        if (req.file) {
+        // Samo Ultimate paket (ili Ultimate) može menjati custom logo
+        if (req.file && verifiedTier === 'ultimate') {
             fs.copyFileSync(req.file.path, LOGO_PATH);
             try { fs.unlinkSync(req.file.path); } catch (err) {}
         }
 
         for (const [key, value] of Object.entries(body)) {
-            if (key === 'company_logo' || key === 'remove_logo') continue;
+            if (key === 'company_logo' || key === 'remove_logo' || key === 'license_tier') continue;
             await dbClient.systemSetting.upsert({
                 where: { key },
                 update: { value: value != null ? value.toString() : '' },
@@ -65,8 +96,15 @@ export const saveSettings = async (req, res) => {
             });
         }
 
+        await dbClient.systemSetting.upsert({
+            where: { key: 'license_tier' },
+            update: { value: verifiedTier },
+            create: { key: 'license_tier', value: verifiedTier }
+        });
+
         res.json({
             success: true,
+            license_tier: verifiedTier,
             hasCustomLogo: fs.existsSync(LOGO_PATH)
         });
     } catch (e) {

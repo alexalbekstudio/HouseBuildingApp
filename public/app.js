@@ -328,6 +328,7 @@ const DOM_TEXT_PAIRS = [
   ['Google App Password (16 znakova)', 'Google App Password (16 chars)'],
   ['💾 Sačuvaj sva podešavanja', '💾 Save All Settings'],
   ['Sačuvaj sva podešavanja', 'Save All Settings'],
+  ['Licencni ključ (Activation Key)', 'License Key (Activation Key)'],
   // Modal za novo gradilište i prijava
   ['Dodaj novo gradilište / kuću', 'Add New Construction Site / House'],
   ['Naziv objekta *', 'Project Name *'],
@@ -2167,21 +2168,52 @@ window.loadSystemSettings = async () => {
 };
 
 function applyTierRestrictions(tier) {
+  const cleanTier = (tier || 'core').toLowerCase();
   const badge = document.getElementById('settings-tier-badge');
-  if (badge) badge.textContent = `${tier.toUpperCase()} EDITION`;
+  if (badge) {
+    badge.textContent = `${cleanTier.toUpperCase()} EDITION`;
+    badge.className = cleanTier === 'ultimate'
+      ? 'text-xs font-extrabold uppercase bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full border border-indigo-200'
+      : (cleanTier === 'pro'
+          ? 'text-xs font-extrabold uppercase bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200'
+          : 'text-xs font-extrabold uppercase bg-slate-200 text-slate-700 px-3 py-1 rounded-full border border-slate-300');
+  }
 
-  // Core (49€): 1 objekat, bez OCR kamere i bez multi-project dugmeta
-  // Pro (99€): Više objekata + OCR kamera + Mapa + Izvoz
-  // Ultimate (179€): Sve otključano + Admin Panel + White-label
+  const isProOrAbove = cleanTier === 'pro' || cleanTier === 'ultimate';
+  const isUltimate = cleanTier === 'ultimate';
+
+  // 1. Dugme "+ Nova kuća" (Multi-project: Pro i Ultimate)
   const newProjBtn = document.querySelector('button[onclick="openNewProjectModal()"]');
-  const camButtons = document.querySelectorAll('button[onclick^="openCameraModal"]');
+  if (newProjBtn) newProjBtn.classList.toggle('hidden', !isProOrAbove);
 
-  if (tier === 'core') {
-    if (newProjBtn) newProjBtn.classList.add('hidden');
-    camButtons.forEach(b => b.classList.add('hidden'));
-  } else {
-    if (newProjBtn) newProjBtn.classList.remove('hidden');
-    camButtons.forEach(b => b.classList.remove('hidden'));
+  // 2. OCR Kamera dugmad na svim tabovima (Pro i Ultimate)
+  document.querySelectorAll('button[onclick^="openCameraModal"]').forEach(btn => {
+    btn.classList.toggle('hidden', !isProOrAbove);
+  });
+
+  // 3. Tab "Karta" (Pro i Ultimate)
+  const mapTabBtn = document.getElementById('tab-btn-mapa');
+  if (mapTabBtn) mapTabBtn.classList.toggle('hidden', !isProOrAbove);
+
+  // 4. Excel i PDF izvoz dugmad (Pro i Ultimate; Core ima samo CSV)
+  const excelBtn = document.querySelector('button[onclick="exportData(\'excel\')"]');
+  const pdfBtn = document.querySelector('button[onclick="exportData(\'pdf\')"]');
+  if (excelBtn) excelBtn.classList.toggle('hidden', !isProOrAbove);
+  if (pdfBtn) pdfBtn.classList.toggle('hidden', !isProOrAbove);
+
+  // 5. Građevinski & Meteo Dnevnik + Foto-galerija (Samo Ultimate)
+  const siteLogFormCard = document.getElementById('sitelog-form')?.closest('div.bg-white');
+  const siteLogListCard = document.getElementById('sitelogs-list')?.closest('div.bg-white');
+  const photoGalleryCard = document.getElementById('photo-timeline-grid')?.closest('div.bg-white');
+  if (siteLogFormCard) siteLogFormCard.classList.toggle('hidden', !isUltimate);
+  if (siteLogListCard) siteLogListCard.classList.toggle('hidden', !isUltimate);
+  if (photoGalleryCard) photoGalleryCard.classList.toggle('hidden', !isUltimate);
+
+  // 6. Upload custom logotipa / White-Label (Samo Ultimate)
+  const logoInput = document.getElementById('set-company-logo');
+  if (logoInput) {
+    logoInput.disabled = !isUltimate;
+    logoInput.title = isUltimate ? '' : 'Dostupno u Ultimate paketu (179€)';
   }
 }
 
@@ -2189,11 +2221,11 @@ window.removeCustomLogo = async () => {
   const fd = new FormData();
   fd.append('remove_logo', 'true');
   const res = await fetch('/api/settings', { method: 'POST', body: fd });
-  if (res.ok) await window.loadSystemSettings();
+  if (res.ok) await window.setVal('set-license-key', settings.license_key || '');;
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  window.loadSystemSettings();
+  window.setVal('set-license-key', settings.license_key || '');;
 
   const settingsForm = document.getElementById('system-settings-form');
   if (settingsForm) {
@@ -2202,7 +2234,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fd = new FormData(settingsForm);
       const res = await fetch('/api/settings', { method: 'POST', body: fd });
       if (res.ok) {
-        await window.loadSystemSettings();
+        await window.setVal('set-license-key', settings.license_key || '');;
         alert(currentLang === 'en' ? 'Settings saved successfully!' : 'Podešavanja su uspešno sačuvana!');
       }
     });

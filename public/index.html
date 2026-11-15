@@ -16,6 +16,12 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @media (max-width: 640px) {
+      body { padding-bottom: 70px; }
+      header + div { padding-top: 6.5rem !important; }
+      #map { height: 360px !important; }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
@@ -62,9 +68,6 @@
           <div class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 whitespace-nowrap">
             <span id="user-display-name" class="font-bold text-xs text-slate-700"></span>
           </div>
-          <button id="btn-admin-panel" onclick="switchTab('admin')" class="hidden bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold px-3 py-1.5 rounded-xl border border-purple-200 text-xs transition flex items-center gap-1 shadow-sm whitespace-nowrap">
-            👑 Admin Panel
-          </button>
           <button id="btn-logout" onclick="logout()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-sm border border-slate-200 whitespace-nowrap">
             Odjavi se
           </button>
@@ -142,10 +145,6 @@
 
       <button type="button" onclick="switchTab('rokovi')" id="tab-btn-rokovi" class="tab-btn py-2 px-2 sm:px-2.5 font-semibold text-[11px] sm:text-xs whitespace-nowrap transition border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1">
         <span>⏱️</span> Rokovi
-      </button>
-
-      <button type="button" onclick="switchTab('admin')" id="tab-btn-admin" class="tab-btn hidden py-2 px-2 sm:px-2.5 font-semibold text-[11px] sm:text-xs whitespace-nowrap transition border-b-2 border-transparent text-purple-600 hover:text-purple-800 flex items-center gap-1">
-        <span>👑</span> Admin Panel
       </button>
 
       <button type="button" onclick="switchTab('settings')" id="tab-btn-settings" class="tab-btn py-2 px-2 sm:px-2.5 font-semibold text-[11px] sm:text-xs whitespace-nowrap transition border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-1">
@@ -626,55 +625,6 @@
       </div>
     </div>
 
-    <!-- TAB 9: ADMIN PANEL ZA PRETPLE I KORISNIKE -->
-    <div id="tab-admin" class="tab-content hidden space-y-8">
-      
-      <!-- Zaglavlje sa naslovom levo i grupisanim dugmićima desno -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <h2 class="text-xl font-extrabold text-slate-900">👑 SuperAdmin Kontrolna Tabla</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Upravljanje pretplatnicima, licencama i statusima aktivacije</p>
-        </div>
-        
-        <!-- Grupa dugmića poravnata skroz desno -->
-        <div class="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
-          <button type="button" onclick="loadAdminData()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
-            <span>🔄</span> Osveži podatke
-          </button>
-          
-          <button type="button" onclick="testEmailNotification()" id="btn-test-email" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5">
-            <span>📧</span> Testiraj E-mail
-          </button>
-        </div>
-      </div>
-
-      <!-- Kartice sa metrikama sa jasnim razmakom dole -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 my-2">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <span class="text-xs font-bold text-slate-400 block uppercase tracking-wide">Ukupno Korisnika</span>
-          <span id="adm-total-users" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
-        </div>
-        <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-200 shadow-sm">
-          <span class="text-xs font-bold text-emerald-700 block uppercase tracking-wide">Aktivne Pretplate</span>
-          <span id="adm-active-paid" class="text-2xl font-black text-emerald-800 mt-1 block">0</span>
-        </div>
-        <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200 shadow-sm">
-          <span class="text-xs font-bold text-amber-700 block uppercase tracking-wide">U Probnom Periodu</span>
-          <span id="adm-trials" class="text-2xl font-black text-amber-800 mt-1 block">0</span>
-        </div>
-        <div class="bg-rose-50 p-5 rounded-2xl border border-rose-200 shadow-sm">
-          <span class="text-xs font-bold text-rose-700 block uppercase tracking-wide">Istekle</span>
-          <span id="adm-expired" class="text-2xl font-black text-rose-800 mt-1 block">0</span>
-        </div>
-      </div>
-
-      <!-- Tabela korisnika i pretplata -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-2">
-        <h3 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100">Pregled Registrovanih Pretplatnika</h3>
-        <div id="admin-users-table-container" class="overflow-x-auto"></div>
-      </div>
-    </div>
-
     <!-- TAB 10: PODEŠAVANJA FIRME, LOGO, SMTP I LICENCA (PUNA ŠIRINA) -->
     <div id="tab-settings" class="tab-content hidden space-y-6">
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 w-full">
@@ -729,12 +679,8 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Paket licence (Tier)</label>
-              <select id="set-license-tier" name="license_tier" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white font-bold outline-none">
-                <option value="core">Core (49€)</option>
-                <option value="pro">Pro (99€)</option>
-                <option value="ultimate">Ultimate (179€)</option>
-              </select>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Licencni ključ (Activation Key)</label>
+              <input id="set-license-key" name="license_key" type="text" placeholder="HB-XXXX-XXXX-XXXX" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white font-mono font-bold uppercase outline-none focus:border-blue-500" />
             </div>
           </div>
 
@@ -760,7 +706,10 @@
             </div>
           </div>
 
-          <div class="flex justify-end pt-2">
+          <div class="flex justify-end gap-3 pt-2">
+            <button type="button" onclick="testEmailNotification()" id="btn-test-email" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2.5 rounded-xl text-sm border border-slate-300 transition">
+              📧 Testiraj E-mail
+            </button>
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-sm transition">
               💾 Sačuvaj sva podešavanja
             </button>
