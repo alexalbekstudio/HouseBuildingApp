@@ -1,3 +1,29 @@
+import prisma from '../config/db.js';
+
+export async function getDynamicSmtpConfig() {
+  try {
+    const rows = await prisma.systemSetting.findMany({
+      where: { key: { in: ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'company_name'] } }
+    });
+    const map = Object.fromEntries(rows.map(r => [r.key, r.value]));
+    return {
+      host: map.smtp_host || process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: Number(map.smtp_port || process.env.SMTP_PORT || 587),
+      user: map.smtp_user || process.env.SMTP_USER || '',
+      pass: map.smtp_pass || process.env.SMTP_PASS || '',
+      companyName: map.company_name || 'HouseBuilding'
+    };
+  } catch (e) {
+    return {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: Number(process.env.SMTP_PORT || 587),
+      user: process.env.SMTP_USER || '',
+      pass: process.env.SMTP_PASS || '',
+      companyName: 'HouseBuilding'
+    };
+  }
+}
+
 import nodemailer from 'nodemailer';
 
 // Konfiguracija SMTP transportera iz .env promenljivih

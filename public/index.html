@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HouseBuilding - Upravljanje Gradnjom</title>
-  <link rel="icon" href="data:,">
   <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/favicon.ico">
+  <script src="/i18n.js" defer></script>
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Leaflet CSS i JS za mapu -->
@@ -22,14 +24,13 @@
     <!-- Header -->
 <!-- FIKSIRANA GORNJA TRAKA (HEADER SA BLAGOM SENKOM) -->
     <header class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm z-40 py-2 px-4 sm:px-6 transition-all">
-      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        
-        <!-- Lijeva strana: Logo, Bedž, Birač gradilišta, Jezik i Pomoć -->
-        <div class="flex items-center gap-2.5 flex-nowrap shrink-0">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4">
+
+        <!-- Lijeva strana: Dinamički Logo, Birač gradilišta, Jezik i Pomoć -->
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           <div class="flex items-center gap-2">
-            <img src="/images/logo-icon.png" alt="Alexandar Logo" class="h-8 w-auto object-contain drop-shadow-sm" />
-            <span class="text-lg sm:text-xl font-black text-slate-900 tracking-tight whitespace-nowrap">HouseBuilding</span>
-            <span class="text-[10px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider hidden sm:inline-block">Melenci</span>
+            <img src="/company-logo.png" alt="Logo" class="hb-company-logo h-8 w-auto object-contain drop-shadow-sm hidden" onerror="this.classList.add('hidden')" />
+            <span class="hb-company-name text-lg sm:text-xl font-black text-slate-900 tracking-tight whitespace-nowrap">HouseBuilding</span>
           </div>
 
           <!-- Birač aktivnog gradilišta -->
@@ -145,6 +146,10 @@
 
       <button type="button" onclick="switchTab('admin')" id="tab-btn-admin" class="tab-btn hidden py-2 px-2 sm:px-2.5 font-semibold text-[11px] sm:text-xs whitespace-nowrap transition border-b-2 border-transparent text-purple-600 hover:text-purple-800 flex items-center gap-1">
         <span>👑</span> Admin Panel
+      </button>
+
+      <button type="button" onclick="switchTab('settings')" id="tab-btn-settings" class="tab-btn py-2 px-2 sm:px-2.5 font-semibold text-[11px] sm:text-xs whitespace-nowrap transition border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-1">
+        <span>⚙️</span> Podešavanja & Licenca
       </button>
     </nav>
 
@@ -621,7 +626,7 @@
       </div>
     </div>
 
-<!-- TAB 9: ADMIN PANEL ZA PRETPLE I KORISNIKE -->
+    <!-- TAB 9: ADMIN PANEL ZA PRETPLE I KORISNIKE -->
     <div id="tab-admin" class="tab-content hidden space-y-8">
       
       <!-- Zaglavlje sa naslovom levo i grupisanim dugmićima desno -->
@@ -670,6 +675,100 @@
       </div>
     </div>
 
+    <!-- TAB 10: PODEŠAVANJA FIRME, LOGO, SMTP I LICENCA (PUNA ŠIRINA) -->
+    <div id="tab-settings" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 w-full">
+        <div class="border-b border-slate-100 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-900">⚙️ Podešavanja Sistema & Brendiranje</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Podaci o firmi/investitoru, prilagođeni logo, valuta, SMTP alarmi i licenca</p>
+          </div>
+          <span id="settings-tier-badge" class="text-xs font-extrabold uppercase bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full border border-indigo-200 self-start sm:self-auto">
+            ULTIMATE EDITION
+          </span>
+        </div>
+
+        <form id="system-settings-form" class="space-y-6">
+          <!-- 1. Podaci o firmi (4 kolone na širokom ekranu) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Naziv firme / Investitora</label>
+              <input id="set-company-name" name="company_name" type="text" placeholder="HouseBuilding" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">PIB / Matični broj</label>
+              <input id="set-company-pib" name="company_pib" type="text" placeholder="100000000" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Adresa sedišta</label>
+              <input id="set-company-address" name="company_address" type="text" placeholder="Ulica i broj, Grad" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Tekući račun / IBAN</label>
+              <input id="set-company-bank" name="company_bank_acc" type="text" placeholder="160-0000000000000-00" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500" />
+            </div>
+          </div>
+
+          <!-- 2. Upload logotipa, valuta i licenca -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Logo firme i Favicon (PNG/JPG)</label>
+              <input id="set-company-logo" name="company_logo" type="file" accept="image/png,image/jpeg,image/webp" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs bg-white" />
+              <div class="flex items-center gap-3 mt-2">
+                <img id="set-logo-preview" src="/company-logo.png" alt="Logo preview" class="hb-company-logo h-10 w-auto object-contain hidden border border-slate-200 rounded p-1 bg-white" />
+                <button type="button" onclick="removeCustomLogo()" class="text-xs text-rose-600 font-bold hover:underline">Ukloni logo</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Valuta prikaza</label>
+              <select id="set-currency" name="currency_base" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white outline-none">
+                <option value="RSD">RSD (din)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="USD">USD ($)</option>
+                <option value="BAM">BAM (KM)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Paket licence (Tier)</label>
+              <select id="set-license-tier" name="license_tier" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white font-bold outline-none">
+                <option value="core">Core (49€)</option>
+                <option value="pro">Pro (99€)</option>
+                <option value="ultimate">Ultimate (179€)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 3. SMTP Email podešavanja za alarme -->
+          <div class="border-t border-slate-100 pt-4">
+            <h3 class="text-sm font-bold text-slate-900 mb-3">📧 SMTP Podešavanja za Email Alarme o Rokovima</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase text-slate-500 mb-1">SMTP Host & Port</label>
+                <div class="flex gap-2">
+                  <input id="set-smtp-host" name="smtp_host" type="text" placeholder="smtp.gmail.com" class="w-2/3 border border-slate-300 rounded-lg p-2.5 text-sm outline-none" />
+                  <input id="set-smtp-port" name="smtp_port" type="number" placeholder="587" class="w-1/3 border border-slate-300 rounded-lg p-2.5 text-sm outline-none" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase text-slate-500 mb-1">SMTP Email (Korisnik)</label>
+                <input id="set-smtp-user" name="smtp_user" type="email" placeholder="vas-email@gmail.com" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Google App Password (16 znakova)</label>
+                <input id="set-smtp-pass" name="smtp_pass" type="password" placeholder="•••• •••• •••• ••••" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none" />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-sm transition">
+              💾 Sačuvaj sva podešavanja
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- MODAL ZA PRIJAVU I REGISTRACIJU -->
     <div id="auth-modal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4">
       <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
@@ -680,9 +779,9 @@
         </div>
         <!-- Zaglavlje modala sa vašim logotipom -->
         <div class="text-center flex flex-col items-center">
-          <img src="/images/logo-icon.png" alt="Alexandar Logo" class="h-16 w-auto object-contain mb-2 drop-shadow" />
-          <img src="/images/logo-wordmark.png" alt="Alexandar" class="h-6 w-auto object-contain mb-2" />
-          <h2 id="auth-modal-title" class="text-lg font-black text-slate-900">Prijava na HouseBuilding SaaS</h2>
+          <img src="/company-logo.png" alt="Logo" class="hb-company-logo h-16 w-auto object-contain mb-2 drop-shadow hidden" onerror="this.classList.add('hidden')" />
+          <span class="text-3xl mb-1">🏠</span>
+          <h2 id="auth-modal-title" class="text-lg font-black text-slate-900">Prijava na <span class="hb-company-name">HouseBuilding</span></h2>
           <p id="auth-modal-subtitle" class="text-xs text-slate-500 mt-0.5">Sistem za praćenje izgradnje, troškova i dokumentacije</p>
         </div>
 
@@ -799,16 +898,16 @@
     <footer class="fixed bottom-0 left-0 w-full bg-slate-950 border-t border-slate-800 text-white py-2.5 px-4 sm:px-8 z-40 shadow-2xl">
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-4">
         
-        <!-- Lijeva strana: ALEXANDAR logo -->
-        <div class="flex items-center gap-3">
-          <img src="/images/logo-icon-rgb.png" alt="Alexandar Ikona" class="h-8 w-auto object-contain" />
-          <img src="/images/logo-wordmark-rgb.png" alt="ALEXANDAR" class="h-6 sm:h-7 w-auto object-contain" />
+        <!-- Lijeva strana: Dinamički logo i naziv firme kupca -->
+        <div class="flex items-center gap-2.5">
+          <img src="/company-logo.png" alt="Logo" class="hb-company-logo h-7 w-auto object-contain hidden" onerror="this.classList.add('hidden')" />
+          <span class="hb-company-name text-xs font-extrabold text-white tracking-wide">HouseBuilding</span>
         </div>
 
         <!-- Sredina: Centrirana autorska prava -->
         <div class="text-center">
           <p class="text-xs text-slate-300">
-            © 2026 <span class="text-amber-400 font-bold">HouseBuilding SaaS</span>. Sva prava zadržana.
+            © 2026 <span class="hb-company-name text-amber-400 font-bold">HouseBuilding</span>. Sva prava zadržana.
           </p>
         </div>
 

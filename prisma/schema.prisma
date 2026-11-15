@@ -214,3 +214,10 @@ model Reminder {
   company     Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
 }
+
+model SystemSetting {
+  id               Int      @id @default(autoincrement())
+  key              String   @unique
+  value            String?  @db.Text
+  updatedAt        DateTime @updatedAt
+}

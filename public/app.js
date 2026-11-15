@@ -34,7 +34,7 @@ window.fetchAuth = async (url, options = {}) => {
 };
 
 // ==========================================
-// DVOJEZIČNOST (SR / EN)
+// DVOJEZIČNOST (SR / EN) — KOMPLETAN SISTEM
 // ==========================================
 const i18n = {
   sr: {
@@ -43,14 +43,6 @@ const i18n = {
     plannedBudget: 'Planiran Budžet',
     totalSpent: 'Potrošeno',
     remaining: 'Preostalo',
-    tabFaze: 'Pravni tok & Faze (8)',
-    tabTroskovi: 'Finansije & OCR Unos',
-    tabFirme: 'Firme & Partneri',
-    tabMapa: 'Interaktivna Mapa',
-    tabDokumenti: 'Dokumenti & Foto-Dnevnik',
-    tabMaterijali: 'Materijali & Ponude',
-    tabKapital: 'Kapital & Finansiranje',
-    tabRokovi: 'Vremenska linija & Podsetnici',
     ocrProcessing: 'OCR analizira sliku i automatski popunjava podatke...',
     phasesTitle: 'Pravni tok — 8 faza od parcele do upotrebne dozvole',
     phasesHint: 'Izaberite status faze za automatsko ažuriranje',
@@ -72,13 +64,13 @@ const i18n = {
     mapTitle: 'Mapa gradilišta i dobavljača',
     mapHint: 'Kliknite ili prevucite kućicu na tačnu parcelu u Melencima za trajno čuvanje u bazi',
     myLocation: 'Moja lokacija na terenu',
-    addDoc: '+ Priloži Dokument / Sliku',
-    snapWork: 'Slikaj radove',
+    addDoc: '📄 Priloži Dokument / Sliku',
+    snapWork: 'Slikaj',
     docTitleLabel: 'Naziv dokumenta / radova',
     docPhaseLabel: 'Pravna faza',
     docFileLabel: 'Fajl (PDF, JPG, PNG)',
     btnSaveDoc: 'Sačuvaj u Arhiv',
-    docsTitle: 'Arhiva gradilišta',
+    docsTitle: '📁 Arhiva dokumenata i slika',
     addMat: '+ Dodaj Materijal',
     snapMat: 'Slikaj deklaraciju',
     matNameLabel: 'Naziv materijala *',
@@ -127,14 +119,6 @@ const i18n = {
     plannedBudget: 'Planned Budget',
     totalSpent: 'Total Spent',
     remaining: 'Remaining',
-    tabFaze: 'Legal Flow & Phases (8)',
-    tabTroskovi: 'Finances & OCR Input',
-    tabFirme: 'Companies & Partners',
-    tabMapa: 'Interactive Map',
-    tabDokumenti: 'Documents & Site Log',
-    tabMaterijali: 'Materials & Quotes',
-    tabKapital: 'Capital & Financing',
-    tabRokovi: 'Timeline & Reminders',
     ocrProcessing: 'OCR analyzing image and autofilling data...',
     phasesTitle: 'Legal Flow — 8 phases from plot to occupancy permit',
     phasesHint: 'Select phase status for automatic update',
@@ -154,15 +138,15 @@ const i18n = {
     btnSaveCompany: 'Save Company',
     companiesTitle: 'Partners & Contractors Directory',
     mapTitle: 'Construction site & supplier map',
-    mapHint: 'Click or drag the house icon to the exact plot in Melenci to save permanently',
+    mapHint: 'Click or drag the house icon to the exact plot to save permanently',
     myLocation: 'My location on site',
-    addDoc: '+ Attach Document / Photo',
-    snapWork: 'Capture work',
+    addDoc: '📄 Attach Document / Photo',
+    snapWork: 'Capture',
     docTitleLabel: 'Document / work title',
     docPhaseLabel: 'Legal phase',
     docFileLabel: 'File (PDF, JPG, PNG)',
     btnSaveDoc: 'Save to Archive',
-    docsTitle: 'Construction Site Archive',
+    docsTitle: '📁 Construction Site Archive',
     addMat: '+ Add Material',
     snapMat: 'Snap product label',
     matNameLabel: 'Material name *',
@@ -207,6 +191,242 @@ const i18n = {
   }
 };
 
+// Rečnik svih tekstualnih čvorova (SR <-> EN) za tabove, faze iz baze, Dnevnik, Admin Panel, modale i tabele
+const DOM_TEXT_PAIRS = [
+  ['Gradilište:', 'Site:'],
+  ['+ Nova kuća', '+ New Project'],
+  ['Odjavi se', 'Logout'],
+  ['Izvezi:', 'Export:'],
+  ['Faze (8)', 'Phases (8)'],
+  ['Finansije & OCR', 'Finance & OCR'],
+  ['Partneri', 'Partners'],
+  ['Karta', 'Map'],
+  ['Dokumenti & Dnevnik', 'Docs & Site Log'],
+  ['Materijali', 'Materials'],
+  ['Kapital', 'Capital'],
+  ['Rokovi', 'Timeline'],
+  ['Admin Panel', 'Admin Panel'],
+  // 8 faza gradnje iz baze
+  ['Provera parcele i identiteta', 'Plot & Ownership Verification'],
+  ['Katastarska parcela, vlasništvo, tereti, pristupni put.', 'Cadastral plot, ownership, encumbrances, access road.'],
+  ['Planska pravila', 'Urban Planning Rules'],
+  ['Namena, indeks zauzetosti i izgrađenosti, gabariti, spratnost.', 'Zoning purpose, occupancy & construction index, dimensions, floors.'],
+  ['Geodetski i geotehnički podaci', 'Geodetic & Geotechnical Survey'],
+  ['Geodetski snimak i geotehnički elaborat tla.', 'Geodetic survey and geotechnical soil study.'],
+  ['Idejno rešenje (IDR)', 'Conceptual Design (IDR)'],
+  ['Idejno rešenje montažne kuće usklađeno sa parcelom.', 'Conceptual house design aligned with the plot.'],
+  ['Lokacijski uslovi', 'Location Conditions'],
+  ['Lokacijski uslovi i priključci (struja, voda, put).', 'Location conditions and utility connections (power, water, road).'],
+  ['Projekat i građevinska dozvola (PGD)', 'Main Project & Building Permit (PGD)'],
+  ['Glavni projekat, takse i rešenje o građevinskoj dozvoli.', 'Main project, fees and building permit issuance.'],
+  ['Prijava radova i gradnja', 'Works Registration & Construction'],
+  ['Prijava radova, temelj, montaža i instalacije.', 'Works registration, foundation, assembly and installations.'],
+  ['Tehnički pregled i upotrebna dozvola', 'Technical Inspection & Occupancy Permit'],
+  ['Tehnički pregled objekta, uknjižba i upotrebna dozvola.', 'Technical inspection, registration and occupancy permit.'],
+  ['NIJE POCETO', 'NOT STARTED'],
+  ['NIJE POČETO', 'NOT STARTED'],
+  ['U TOKU', 'IN PROGRESS'],
+  ['ZAVRSENO', 'COMPLETED'],
+  ['ZAVRŠENO', 'COMPLETED'],
+  // Padajuće liste i prazna stanja
+  ['Izaberite fazu...', 'Select phase...'],
+  ['-- Bez firme --', '-- No company --'],
+  ['Gotovina (keš)', 'Cash'],
+  ['Račun / Prenos', 'Bank Transfer'],
+  ['Kartica', 'Card'],
+  ['Nema zabeleženih troškova.', 'No expenses recorded yet.'],
+  ['Datum', 'Date'],
+  ['Faza', 'Phase'],
+  ['Opis', 'Description'],
+  ['Firma', 'Company'],
+  ['Plaćanje', 'Payment'],
+  ['Iznos', 'Amount'],
+  ['Račun', 'Receipt'],
+  ['Izvođač', 'Contractor'],
+  ['Stovarište', 'Building Supply'],
+  ['Geometar', 'Surveyor'],
+  ['Projektant', 'Architect'],
+  ['Nadzor', 'Supervisor'],
+  ['Nema unetih firmi ni majstora.', 'No companies or contractors added yet.'],
+  ['Nema upisane adrese', 'No address entered'],
+  // Dokumenti & Dnevnik radova
+  ['-- Opšti dokument (bez faze) --', '-- General document (no phase) --'],
+  ['Opšti dokument', 'General document'],
+  ['Otvori fajl ↗', 'Open file ↗'],
+  ['Nema priloženih dokumenata.', 'No documents attached yet.'],
+  ['Dnevnik radova', 'Daily Site Log'],
+  ['Automatski ili ručni unos vremenskih uslova.', 'Automatic or manual weather condition entry.'],
+  ['Vrsta radova', 'Work Type'],
+  ['Temperatura (°C)', 'Temperature (°C)'],
+  ['Vrijeme / Vjetar', 'Weather / Wind'],
+  ['Beleška / Opis toka radova', 'Notes / Work Progress Description'],
+  ['Zabeleži u Dnevnik', 'Save Log Entry'],
+  ['Zapisnik gradilišta & Vremenski uslovi', 'Site Log & Weather Conditions'],
+  ['Istorija izvođenja radova sa podacima o temperaturi i vetru.', 'History of construction works with temperature and wind data.'],
+  ['🔄 Osveži', '🔄 Refresh'],
+  ['Nema unosa u građevinskom dnevniku za ovo gradilište.', 'No site log entries for this construction site yet.'],
+  ['Hronološka Galerija Napretka', 'Chronological Progress Gallery'],
+  ['Vizuelno praćenje radova i poređenje stanja po fazama gradnje.', 'Visual progress tracking and phase-by-phase comparison.'],
+  ['Sve faze radova', 'All construction phases'],
+  ['Nema evidentiranih fotografija za izabranu fazu (PDF dokumenti su u gornjoj arhivi).', 'No photos recorded for the selected phase (PDF documents are in the archive above).'],
+  // Materijali, Kapital, Rokovi
+  ['kom', 'pcs'],
+  ['tona', 'ton'],
+  ['metar', 'meter'],
+  ['Nema unetog materijala u katalogu.', 'No materials in the catalog yet.'],
+  ['Bez napomene', 'No notes'],
+  ['Ušteđevina', 'Savings'],
+  ['Bankarski Kredit', 'Bank Loan'],
+  ['Pozajmica', 'Loan'],
+  ['Pomoć / Donacija', 'Grant / Donation'],
+  ['Nema unetih izvora finansiranja.', 'No funding sources added yet.'],
+  ['Visoko', 'High'],
+  ['Srednje', 'Medium'],
+  ['Nisko', 'Low'],
+  ['Dozvole i opština', 'Permits & Municipality'],
+  ['Zakonski rok', 'Legal Deadline'],
+  ['Gradilište i majstori', 'Site & Contractors'],
+  ['Plaćanje i banka', 'Payment & Bank'],
+  ['Opšte', 'General'],
+  ['Nema aktivnih podsetnika. Kliknite na "Generiši zakonske rokove" da automatski popunite obaveze.', 'No active reminders. Click "Generate legal deadlines" to autofill obligations.'],
+  // Admin Panel
+  ['👑 SuperAdmin Kontrolna Tabla', '👑 SuperAdmin Control Panel'],
+  ['Upravljanje pretplatnicima, licencama i statusima aktivacije', 'Manage subscribers, licenses and activation statuses'],
+  ['Osveži podatke', 'Refresh Data'],
+  ['Testiraj E-mail', 'Test Email'],
+  ['Ukupno Korisnika', 'Total Users'],
+  ['Aktivne Pretplate', 'Active Subscriptions'],
+  ['U Probnom Periodu', 'In Trial Period'],
+  ['Istekle', 'Expired'],
+  ['Pregled Registrovanih Pretplatnika', 'Registered Subscribers Overview'],
+  ['Korisnik', 'User'],
+  ['Uloga', 'Role'],
+  ['Plan', 'Plan'],
+  ['Status Pretplata', 'Subscription Status'],
+  ['Ističe', 'Expires'],
+  ['Projekat & Statistika', 'Project & Stats'],
+  ['Akcija', 'Action'],
+  ['Neograničeno', 'Unlimited'],
+  ['Bez projekta', 'No project'],
+  ['+30 dana / Aktiviraj', '+30 Days / Activate'],
+  ['Podešavanja & Licenca', 'Settings & License'],
+  ['⚙️ Podešavanja Sistema & Brendiranje', '⚙️ System Settings & Branding'],
+  ['Podešavanja Sistema & Brendiranje', 'System Settings & Branding'],
+  ['Podaci o firmi/investitoru, prilagođeni logo, valuta, SMTP alarmi i licenca', 'Company/investor details, custom logo, currency, SMTP alerts and license'],
+  ['Naziv firme / Investitora', 'Company / Investor Name'],
+  ['PIB / Matični broj', 'Tax ID / Registration No.'],
+  ['Adresa sedišta', 'Company Address'],
+  ['Tekući račun / IBAN', 'Bank Account / IBAN'],
+  ['Logo firme i Favicon (PNG/JPG)', 'Company Logo & Favicon (PNG/JPG)'],
+  ['Ukloni logo', 'Remove logo'],
+  ['Valuta prikaza', 'Display Currency'],
+  ['Paket licence (Tier)', 'License Edition (Tier)'],
+  ['📧 SMTP Podešavanja za Email Alarme o Rokovima', '📧 SMTP Settings for Deadline Email Alerts'],
+  ['SMTP Podešavanja za Email Alarme o Rokovima', 'SMTP Settings for Deadline Email Alerts'],
+  ['SMTP Host & Port', 'SMTP Host & Port'],
+  ['SMTP Email (Korisnik)', 'SMTP Email (Username)'],
+  ['Google App Password (16 znakova)', 'Google App Password (16 chars)'],
+  ['💾 Sačuvaj sva podešavanja', '💾 Save All Settings'],
+  ['Sačuvaj sva podešavanja', 'Save All Settings'],
+  // Modal za novo gradilište i prijava
+  ['Dodaj novo gradilište / kuću', 'Add New Construction Site / House'],
+  ['Naziv objekta *', 'Project Name *'],
+  ['Lokacija / Mesto', 'Location / City'],
+  ['Okvirni planirani budžet (RSD)', 'Estimated Planned Budget (RSD)'],
+  ['ℹ️ Sistem automatski kreira svih 8 zakonskih faza i prazan dnevnik za ovo novo gradilište.', 'ℹ️ The system automatically creates all 8 legal phases and an empty site log for this project.'],
+  ['Otkaži', 'Cancel'],
+  ['Kreiraj gradilište', 'Create Project'],
+  ['Prijava na HouseBuilding SaaS', 'Sign in to HouseBuilding SaaS'],
+  ['Sistem za praćenje izgradnje, troškova i dokumentacije', 'Construction, expense and document tracking system'],
+  ['Vaše Ime i Prezime', 'Your Full Name'],
+  ['Email adresa', 'Email Address'],
+  ['Lozinka', 'Password'],
+  ['Naziv vašeg projekta', 'Your Project Name'],
+  ['Prijavi se', 'Sign In'],
+  ['Nemate nalog? Registrujte se', "Don't have an account? Register"],
+  ['Registracija novog naloga', 'Register New Account'],
+  ['Kreiraj nalog & Započni projekat', 'Create Account & Start Project'],
+  ['Već imate nalog? Prijavite se', 'Already have an account? Sign In'],
+  // Footer
+  ['Verzija 2.4 PWA', 'Version 2.4 PWA'],
+  ['● Sistem aktivan', '● System active']
+];
+
+const PLACEHOLDER_PAIRS = [
+  ['npr. Armaturna mreža Q335', 'e.g. Reinforcing mesh Q335'],
+  ['Naziv firme / Ime *', 'Company / Contractor Name *'],
+  ['PIB', 'Tax ID / VAT'],
+  ['Adresa sedišta (npr. Melenci, Glavna 1)', 'Company address (e.g. Main St 1)'],
+  ['Telefon', 'Phone number'],
+  ['npr. Lokacijski uslovi ili Temeljna armatura', 'e.g. Location permit or Foundation rebar'],
+  ['npr. Zidanje pregradnih zidova', 'e.g. Partition wall masonry'],
+  ['Auto / npr. 22', 'Auto / e.g. 22'],
+  ['Auto / npr. Sunčano', 'Auto / e.g. Sunny'],
+  ['Opiši tok radova, zastoje ili napredak...', 'Describe work progress, delays or notes...'],
+  ['Pretraži arhiv...', 'Search archive...'],
+  ['npr. Beton MB30', 'e.g. Concrete MB30'],
+  ['npr. Zidarski, Armatura, Izolacija', 'e.g. Masonry, Rebar, Insulation'],
+  ['Specifikacija ili zahtevi za kvalitet...', 'Specification or quality requirements...'],
+  ['npr. Ušteđevina, Kredit OTP banke', 'e.g. Savings, Bank loan'],
+  ['npr. Prijava početka radova', 'e.g. Construction start notice'],
+  ['Detalji, kontakti ili dokumenti...', 'Details, contacts or documents...'],
+  ['npr. Vikendica Fruška Gora ili Kuća Melenci 2', 'e.g. Weekend House or Family Home 2'],
+  ['npr. Melenci, Zrenjanin ili Vrdnik', 'e.g. Belgrade, Novi Sad'],
+  ['Ulica i broj, Grad', 'Street and number, City'],
+  ['vas-email@gmail.com', 'your-email@gmail.com']
+];
+
+const srToEnMap = new Map(DOM_TEXT_PAIRS.map(([sr, en]) => [sr.trim(), en]));
+const enToSrMap = new Map(DOM_TEXT_PAIRS.map(([sr, en]) => [en.trim(), sr]));
+const phSrToEnMap = new Map(PLACEHOLDER_PAIRS.map(([sr, en]) => [sr.trim(), en]));
+const phEnToSrMap = new Map(PLACEHOLDER_PAIRS.map(([sr, en]) => [en.trim(), sr]));
+
+let _isTranslatingDom = false;
+window.translateFullDom = (lang) => {
+  if (_isTranslatingDom) return;
+  _isTranslatingDom = true;
+  try {
+    const dict = lang === 'en' ? srToEnMap : enToSrMap;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while ((node = walker.nextNode())) {
+      const tag = node.parentElement?.tagName;
+      if (tag === 'SCRIPT' || tag === 'STYLE') continue;
+      const raw = node.nodeValue;
+      const trimmed = raw ? raw.trim() : '';
+      if (!trimmed) continue;
+
+      if (dict.has(trimmed)) {
+        node.nodeValue = raw.replace(trimmed, dict.get(trimmed));
+      } else if (lang === 'en') {
+        if (trimmed.startsWith('Plan:')) node.nodeValue = raw.replace('Plan:', 'Planned:');
+        else if (trimmed.startsWith('Procena:')) node.nodeValue = raw.replace('Procena:', 'Est. price:');
+        else if (trimmed.includes('troškova,') && trimmed.includes('dok.)')) {
+          node.nodeValue = raw.replace('troškova,', 'expenses,').replace('dok.)', 'docs)');
+        } else if (trimmed.includes('Sva prava zadržana.')) {
+          node.nodeValue = raw.replace('Sva prava zadržana.', 'All rights reserved.');
+        }
+      } else {
+        if (trimmed.startsWith('Planned:')) node.nodeValue = raw.replace('Planned:', 'Plan:');
+        else if (trimmed.startsWith('Est. price:')) node.nodeValue = raw.replace('Est. price:', 'Procena:');
+        else if (trimmed.includes('expenses,') && trimmed.includes('docs)')) {
+          node.nodeValue = raw.replace('expenses,', 'troškova,').replace('docs)', 'dok.)');
+        } else if (trimmed.includes('All rights reserved.')) {
+          node.nodeValue = raw.replace('All rights reserved.', 'Sva prava zadržana.');
+        }
+      }
+    }
+
+    const phDict = lang === 'en' ? phSrToEnMap : phEnToSrMap;
+    document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
+      const ph = (el.getAttribute('placeholder') || '').trim();
+      if (phDict.has(ph)) el.setAttribute('placeholder', phDict.get(ph));
+    });
+  } finally {
+    _isTranslatingDom = false;
+  }
+};
+
 const setSafeText = (id, text) => {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
@@ -238,14 +458,6 @@ window.setLanguage = (lang) => {
   setSafeText('t-planned-budget', t.plannedBudget);
   setSafeText('t-total-spent', t.totalSpent);
   setSafeText('t-remaining', t.remaining);
-  setSafeText('t-tab-faze', t.tabFaze);
-  setSafeText('t-tab-troskovi', t.tabTroskovi);
-  setSafeText('t-tab-firme', t.tabFirme);
-  setSafeText('t-tab-mapa', t.tabMapa);
-  setSafeText('t-tab-dokumenti', t.tabDokumenti);
-  setSafeText('t-tab-materijali', t.tabMaterijali);
-  setSafeText('t-tab-kapital', t.tabKapital);
-  setSafeText('t-tab-rokovi', t.tabRokovi);
   setSafeText('t-ocr-processing', t.ocrProcessing);
   setSafeText('t-phases-title', t.phasesTitle);
   setSafeText('t-phases-hint', t.phasesHint);
@@ -315,8 +527,18 @@ window.setLanguage = (lang) => {
 
   if (currentPhases && currentPhases.length > 0) {
     renderPhases(currentPhases);
+    if (typeof renderGanttChart === 'function') renderGanttChart(currentPhases);
   }
+  window.translateFullDom(lang);
 };
+
+// Automatsko prevođenje svakog dinamički ubačenog HTML-a (faze, tabele, admin panel, dnevnik)
+document.addEventListener('DOMContentLoaded', () => {
+  const obs = new MutationObserver(() => {
+    window.translateFullDom(currentLang);
+  });
+  obs.observe(document.body, { childList: true, subtree: true });
+});
 
 // ==========================================
 // INICIJALIZACIJA
@@ -1896,3 +2118,93 @@ if ('serviceWorker' in navigator) {
       .catch((err) => console.error('PWA SW greška:', err));
   });
 }
+
+// ==========================================
+// 17. WHITE-LABEL PODEŠAVANJA, LOGO I 3 PAKETA (TIERS)
+// ==========================================
+window.HB_SETTINGS = {};
+
+window.loadSystemSettings = async () => {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) return;
+    const { settings, hasCustomLogo } = await res.json();
+    window.HB_SETTINGS = settings || {};
+
+    // Popuni formu u tabu Podešavanja
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+    setVal('set-company-name', settings.company_name);
+    setVal('set-company-pib', settings.company_pib);
+    setVal('set-company-address', settings.company_address);
+    setVal('set-company-bank', settings.company_bank_acc);
+    setVal('set-currency', settings.currency_base || 'RSD');
+    setVal('set-license-tier', settings.license_tier || 'ultimate');
+    setVal('set-smtp-host', settings.smtp_host || 'smtp.gmail.com');
+    setVal('set-smtp-port', settings.smtp_port || '587');
+    setVal('set-smtp-user', settings.smtp_user || '');
+    setVal('set-smtp-pass', settings.smtp_pass || '');
+
+    // Primeni naziv firme svuda
+    const compName = (settings.company_name && settings.company_name.trim()) ? settings.company_name.trim() : 'HouseBuilding';
+    document.querySelectorAll('.hb-company-name').forEach(el => { el.textContent = compName; });
+    document.title = `${compName} - Upravljanje Gradnjom`;
+
+    // Primeni logo firme svuda (Header, Login modal, Settings preview, Footer)
+    document.querySelectorAll('.hb-company-logo').forEach(img => {
+      if (hasCustomLogo) {
+        img.src = '/company-logo.png?t=' + Date.now();
+        img.classList.remove('hidden');
+      } else {
+        img.classList.add('hidden');
+      }
+    });
+
+    // Primeni pravila za 3 komercijalna paketa (Core / Pro / Ultimate)
+    applyTierRestrictions(settings.license_tier || 'ultimate');
+  } catch (err) {
+    console.error('Greška pri učitavanju sistemskih podešavanja:', err);
+  }
+};
+
+function applyTierRestrictions(tier) {
+  const badge = document.getElementById('settings-tier-badge');
+  if (badge) badge.textContent = `${tier.toUpperCase()} EDITION`;
+
+  // Core (49€): 1 objekat, bez OCR kamere i bez multi-project dugmeta
+  // Pro (99€): Više objekata + OCR kamera + Mapa + Izvoz
+  // Ultimate (179€): Sve otključano + Admin Panel + White-label
+  const newProjBtn = document.querySelector('button[onclick="openNewProjectModal()"]');
+  const camButtons = document.querySelectorAll('button[onclick^="openCameraModal"]');
+
+  if (tier === 'core') {
+    if (newProjBtn) newProjBtn.classList.add('hidden');
+    camButtons.forEach(b => b.classList.add('hidden'));
+  } else {
+    if (newProjBtn) newProjBtn.classList.remove('hidden');
+    camButtons.forEach(b => b.classList.remove('hidden'));
+  }
+}
+
+window.removeCustomLogo = async () => {
+  const fd = new FormData();
+  fd.append('remove_logo', 'true');
+  const res = await fetch('/api/settings', { method: 'POST', body: fd });
+  if (res.ok) await window.loadSystemSettings();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  window.loadSystemSettings();
+
+  const settingsForm = document.getElementById('system-settings-form');
+  if (settingsForm) {
+    settingsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(settingsForm);
+      const res = await fetch('/api/settings', { method: 'POST', body: fd });
+      if (res.ok) {
+        await window.loadSystemSettings();
+        alert(currentLang === 'en' ? 'Settings saved successfully!' : 'Podešavanja su uspešno sačuvana!');
+      }
+    });
+  }
+});

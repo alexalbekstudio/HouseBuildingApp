@@ -75,3 +75,6 @@ app.listen(PORT, () => {
   initReminderCron();
   console.log('✔ Cron servis za podsetnike o rokovima je aktivan.');
 });
+
+import settingsRoutes from './routes/settings.routes.js';
+app.use('/', settingsRoutes);
