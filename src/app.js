@@ -20,6 +20,7 @@ import projectRoutes from './routes/projects.routes.js';
 import documentRoutes from './routes/documents.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
 
 dotenv.config();
 
@@ -31,6 +32,10 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Rute za podešavanja, licencu, dinamički logo (/company-logo.png) i favicon (/favicon.ico)
+app.use('/', settingsRoutes);
 
 // Serviranje statičkih datoteka i uploada
 app.use(express.static(path.join(__dirname, '../public')));
@@ -75,6 +80,3 @@ app.listen(PORT, () => {
   initReminderCron();
   console.log('✔ Cron servis za podsetnike o rokovima je aktivan.');
 });
-
-import settingsRoutes from './routes/settings.routes.js';
-app.use('/', settingsRoutes);

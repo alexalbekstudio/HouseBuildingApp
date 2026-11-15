@@ -2125,50 +2125,8 @@ if ('serviceWorker' in navigator) {
 // ==========================================
 window.HB_SETTINGS = {};
 
-window.loadSystemSettings = async () => {
-  try {
-    const res = await fetch('/api/settings');
-    if (!res.ok) return;
-    const { settings, hasCustomLogo } = await res.json();
-    window.HB_SETTINGS = settings || {};
-
-    // Popuni formu u tabu Podešavanja
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
-    setVal('set-company-name', settings.company_name);
-    setVal('set-company-pib', settings.company_pib);
-    setVal('set-company-address', settings.company_address);
-    setVal('set-company-bank', settings.company_bank_acc);
-    setVal('set-currency', settings.currency_base || 'RSD');
-    setVal('set-license-tier', settings.license_tier || 'ultimate');
-    setVal('set-smtp-host', settings.smtp_host || 'smtp.gmail.com');
-    setVal('set-smtp-port', settings.smtp_port || '587');
-    setVal('set-smtp-user', settings.smtp_user || '');
-    setVal('set-smtp-pass', settings.smtp_pass || '');
-
-    // Primeni naziv firme svuda
-    const compName = (settings.company_name && settings.company_name.trim()) ? settings.company_name.trim() : 'HouseBuilding';
-    document.querySelectorAll('.hb-company-name').forEach(el => { el.textContent = compName; });
-    document.title = `${compName} - Upravljanje Gradnjom`;
-
-    // Primeni logo firme svuda (Header, Login modal, Settings preview, Footer)
-    document.querySelectorAll('.hb-company-logo').forEach(img => {
-      if (hasCustomLogo) {
-        img.src = '/company-logo.png?t=' + Date.now();
-        img.classList.remove('hidden');
-      } else {
-        img.classList.add('hidden');
-      }
-    });
-
-    // Primeni pravila za 3 komercijalna paketa (Core / Pro / Ultimate)
-    applyTierRestrictions(settings.license_tier || 'ultimate');
-  } catch (err) {
-    console.error('Greška pri učitavanju sistemskih podešavanja:', err);
-  }
-};
-
-function applyTierRestrictions(tier) {
-  const cleanTier = (tier || 'core').toLowerCase();
+window.applyTierRestrictions = (tier) => {
+  const cleanTier = (tier || 'core').toLowerCase().trim();
   const badge = document.getElementById('settings-tier-badge');
   if (badge) {
     badge.textContent = `${cleanTier.toUpperCase()} EDITION`;
@@ -2182,50 +2140,88 @@ function applyTierRestrictions(tier) {
   const isProOrAbove = cleanTier === 'pro' || cleanTier === 'ultimate';
   const isUltimate = cleanTier === 'ultimate';
 
-  // 1. Dugme "+ Nova kuća" (Multi-project: Pro i Ultimate)
+  // 1. Dugme "+ Nova kuća" (Pro i Ultimate)
   const newProjBtn = document.querySelector('button[onclick="openNewProjectModal()"]');
-  if (newProjBtn) newProjBtn.classList.toggle('hidden', !isProOrAbove);
+  if (newProjBtn) newProjBtn.style.display = isProOrAbove ? '' : 'none';
 
-  // 2. OCR Kamera dugmad na svim tabovima (Pro i Ultimate)
+  // 2. OCR Kamera dugmad (Pro i Ultimate)
   document.querySelectorAll('button[onclick^="openCameraModal"]').forEach(btn => {
-    btn.classList.toggle('hidden', !isProOrAbove);
+    btn.style.display = isProOrAbove ? '' : 'none';
   });
 
   // 3. Tab "Karta" (Pro i Ultimate)
   const mapTabBtn = document.getElementById('tab-btn-mapa');
-  if (mapTabBtn) mapTabBtn.classList.toggle('hidden', !isProOrAbove);
+  if (mapTabBtn) mapTabBtn.style.display = isProOrAbove ? '' : 'none';
 
   // 4. Excel i PDF izvoz dugmad (Pro i Ultimate; Core ima samo CSV)
   const excelBtn = document.querySelector('button[onclick="exportData(\'excel\')"]');
   const pdfBtn = document.querySelector('button[onclick="exportData(\'pdf\')"]');
-  if (excelBtn) excelBtn.classList.toggle('hidden', !isProOrAbove);
-  if (pdfBtn) pdfBtn.classList.toggle('hidden', !isProOrAbove);
+  if (excelBtn) excelBtn.style.display = isProOrAbove ? '' : 'none';
+  if (pdfBtn) pdfBtn.style.display = isProOrAbove ? '' : 'none';
 
-  // 5. Građevinski & Meteo Dnevnik + Foto-galerija (Samo Ultimate)
+  // 5. Građevinski & Meteo Dnevnik + Foto-galerija u tabu Dokumenti (Samo Ultimate)
   const siteLogFormCard = document.getElementById('sitelog-form')?.closest('div.bg-white');
   const siteLogListCard = document.getElementById('sitelogs-list')?.closest('div.bg-white');
   const photoGalleryCard = document.getElementById('photo-timeline-grid')?.closest('div.bg-white');
-  if (siteLogFormCard) siteLogFormCard.classList.toggle('hidden', !isUltimate);
-  if (siteLogListCard) siteLogListCard.classList.toggle('hidden', !isUltimate);
-  if (photoGalleryCard) photoGalleryCard.classList.toggle('hidden', !isUltimate);
+  if (siteLogFormCard) siteLogFormCard.style.display = isUltimate ? '' : 'none';
+  if (siteLogListCard) siteLogListCard.style.display = isUltimate ? '' : 'none';
+  if (photoGalleryCard) photoGalleryCard.style.display = isUltimate ? '' : 'none';
+};
 
-  // 6. Upload custom logotipa / White-Label (Samo Ultimate)
-  const logoInput = document.getElementById('set-company-logo');
-  if (logoInput) {
-    logoInput.disabled = !isUltimate;
-    logoInput.title = isUltimate ? '' : 'Dostupno u Ultimate paketu (179€)';
+window.loadSystemSettings = async () => {
+  try {
+    const res = await fetch('/api/settings?t=' + Date.now());
+    if (!res.ok) {
+      console.error('API /api/settings nije dostupan:', res.status);
+      window.applyTierRestrictions('core');
+      return;
+    }
+    const { settings, hasCustomLogo } = await res.json();
+    window.HB_SETTINGS = settings || {};
+
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+    setVal('set-company-name', settings.company_name || 'HouseBuilding');
+    setVal('set-company-pib', settings.company_pib || '');
+    setVal('set-company-address', settings.company_address || '');
+    setVal('set-company-bank', settings.company_bank_acc || '');
+    setVal('set-currency', settings.currency_base || 'RSD');
+    setVal('set-license-key', settings.license_key || '');
+    setVal('set-smtp-host', settings.smtp_host || 'smtp.gmail.com');
+    setVal('set-smtp-port', settings.smtp_port || '587');
+    setVal('set-smtp-user', settings.smtp_user || '');
+    setVal('set-smtp-pass', settings.smtp_pass || '');
+
+    const compName = (settings.company_name && settings.company_name.trim()) ? settings.company_name.trim() : 'HouseBuilding';
+    document.querySelectorAll('.hb-company-name').forEach(el => { el.textContent = compName; });
+    document.title = `${compName} - Upravljanje Gradnjom`;
+
+    document.querySelectorAll('.hb-company-logo').forEach(img => {
+      if (hasCustomLogo) {
+        img.src = '/company-logo.png?t=' + Date.now();
+        img.classList.remove('hidden');
+        img.style.display = 'inline-block';
+      } else {
+        img.classList.add('hidden');
+        img.style.display = 'none';
+      }
+    });
+
+    window.applyTierRestrictions(settings.license_tier || 'core');
+  } catch (err) {
+    console.error('Greška pri učitavanju sistemskih podešavanja:', err);
+    window.applyTierRestrictions('core');
   }
-}
+};
 
 window.removeCustomLogo = async () => {
   const fd = new FormData();
   fd.append('remove_logo', 'true');
   const res = await fetch('/api/settings', { method: 'POST', body: fd });
-  if (res.ok) await window.setVal('set-license-key', settings.license_key || '');;
+  if (res.ok) await window.loadSystemSettings();
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  window.setVal('set-license-key', settings.license_key || '');;
+  window.loadSystemSettings();
 
   const settingsForm = document.getElementById('system-settings-form');
   if (settingsForm) {
@@ -2233,9 +2229,14 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const fd = new FormData(settingsForm);
       const res = await fetch('/api/settings', { method: 'POST', body: fd });
+      const data = await res.json();
       if (res.ok) {
-        await window.setVal('set-license-key', settings.license_key || '');;
-        alert(currentLang === 'en' ? 'Settings saved successfully!' : 'Podešavanja su uspešno sačuvana!');
+        await window.loadSystemSettings();
+        alert(currentLang === 'en'
+          ? `Settings saved! Active Edition: ${(data.license_tier || 'core').toUpperCase()}`
+          : `Podešavanja su sačuvana! Aktivan paket: ${(data.license_tier || 'core').toUpperCase()}`);
+      } else {
+        alert('Greška: ' + (data.error || res.statusText));
       }
     });
   }

@@ -31,5 +31,10 @@
   },
   "prisma": {
     "seed": "node prisma/seed.js"
+  },
+  "nodemonConfig": {
+    "watch": ["src"],
+    "ext": "js,mjs,cjs",
+    "ignore": ["company-logo.png", "settings_local.json", "public/uploads/*"]
   }
 }
